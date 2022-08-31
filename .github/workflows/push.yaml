@@ -1,0 +1,54 @@
+name: Init Rails Microservice
+
+on: [create]
+  # workflow_dispatch:
+  #   inputs:
+  #     repo_tag:
+  #       description: 'What is the name of your new repository?'
+  #       required: true
+  #       type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Checkout repo 
+      uses: actions/checkout@v2
+    - name: set up git config
+      run: | 
+        git config user.name "Github Actions Bot"
+        git config user.email "<>"
+    - name: Ruby Install
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Rails Install
+      run: gem install rails
+    - name: Generate new Rails project
+      run: |
+        rails new ${{ github.event.repository.name }} --minimal --api d=postgresql
+        git add .
+        git commit -m "initialize new repo"
+        git push origin master
+  debug:
+    name: Debug Contexts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        run: |-
+          cat << 'EOF_QUOTED'
+          ${{ toJSON(github) }}
+          EOF_QUOTED
+      - name: Dump job context
+        run: echo '${{ toJSON(job) }}'
+      - name: Dump steps context
+        run: echo '${{ toJSON(steps) }}'
+      - name: Dump runner context
+        run: echo '${{ toJSON(runner) }}'
+      - name: Dump strategy context
+        run: echo '${{ toJSON(strategy) }}'
+      - name: Dump matrix context
+        run: echo '${{ toJSON(matrix) }}'
+      - name: Dump inputs/workflow call context
+        run: echo '${{ toJSON(inputs) }}'
